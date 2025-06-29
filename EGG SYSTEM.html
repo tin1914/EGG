@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="EGG SYSTEM MAIN.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egg Freshness Tester</title>
+</head>
+<body>
+    <div class="container">
+        <div class="frames-container">
+            <!-- Frame 1: Upload Picture -->
+            <div class="frame frame-1 active" id="frame1">
+                <div class="upload-content">
+                    <div class="upload-egg-text">
+                        UPLOAD EGG HERE
+                    </div>
+                    <div class="upload-egg" onclick="chooseFile()">
+                    </div>
+                    
+                    <div class="browse-text">
+                        click the egg to browse or drag egg here
+                    </div>
+                    
+                    <div id="imagePreview" class="image-preview">
+                        <img id="previewImg" src="/placeholder.svg" alt="Preview">
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <input type="file" id="fileInput" accept="image/*">
+                    <button id="nextBtn1" class="button button-secondary" onclick="nextFrame()" style="display: none;">Crack Egg</button>
+                </div>
+            </div>
+
+            <!-- Frame 2: Crack Egg -->
+            <div class="frame frame-2" id="frame2">
+                <div class="crack-content">
+                    <div class="crack-title">
+                        <h2>Ready to crack your egg?</h2><br>
+                    </div>
+                    
+                    <div class="hands-container">
+                        <div class="hand hand-left">
+                            <img class="hand-image" src="https://i.postimg.cc/VvXzsH32/Add-a-heading-11.png" alt="Left hand">
+                        </div>
+                        <div class="hand hand-right">
+                            <img class="hand-image" src="https://i.postimg.cc/yYmJQJ37/Add-a-heading-9.png" alt="Right hand">
+                        </div>
+                        <div id="eggShape" class="egg-shape" onclick="crackEgg()">
+                            <div class="egg-crack"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <button id="crackButton" class="button button-primary" onclick="crackEgg()">
+                        click here to crack the egg
+                    </button>
+                    <button class="button button-secondary" onclick="prevFrame()">Back</button>
+                </div>
+            </div>
+
+            <!-- Frame 3: Results -->
+            <div class="frame frame-3" id="frame3">
+                <div class="result-content">
+                    <div class="result-title">
+                        <h2>Your Egg Is.....</h2>
+                    </div>
+                    
+                    <div class="result-layout">
+                        <div id="resultImage" class="result-image">
+                            <img id="resultImg" src="/placeholder.svg" alt="Your egg">
+                        </div>
+                        
+                        <div class="result-text">
+                            <div class="freshness-badge">FRESH</div>
+                            <p class="result-description">you can still eat it</p>
+                        </div>
+                        
+                        <div class="test-another-button">
+                            <button class="button button-primary" onclick="startOver()">
+                                Test Another Egg
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFrame = 1;
+        let uploadedImage = null;
+        let eggCracked = false;
+
+        // File input handling
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    document.getElementById('previewImg').src = uploadedImage;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('nextBtn1').style.display = 'block';
+                    
+                    // Prepare result image
+                    document.getElementById('resultImg').src = uploadedImage;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function chooseFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function nextFrame() {
+            if (currentFrame < 3) {
+                // Hide current frame
+                document.getElementById(`frame${currentFrame}`).classList.remove('active');
+                document.getElementById(`frame${currentFrame}`).classList.add('prev');
+                
+                // Show next frame
+                currentFrame++;
+                document.getElementById(`frame${currentFrame}`).classList.remove('next');
+                document.getElementById(`frame${currentFrame}`).classList.add('active');
+                
+                // Special handling for frame 3
+                if (currentFrame === 3 && uploadedImage) {
+                    document.getElementById('resultImage').style.display = 'block';
+                }
+            }
+        }
+
+        function prevFrame() {
+            if (currentFrame > 1) {
+                // Hide current frame
+                document.getElementById(`frame${currentFrame}`).classList.remove('active');
+                document.getElementById(`frame${currentFrame}`).classList.add('next');
+                
+                // Show previous frame
+                currentFrame--;
+                document.getElementById(`frame${currentFrame}`).classList.remove('prev');
+                document.getElementById(`frame${currentFrame}`).classList.add('active');
+            }
+        }
+
+        function crackEgg() {
+            if (!eggCracked) {
+                const eggShape = document.getElementById('eggShape');
+                const crackButton = document.getElementById('crackButton');
+                
+                eggShape.classList.add('cracked');
+                crackButton.textContent = 'Analyzing...';
+                crackButton.disabled = true;
+                eggCracked = true;
+                
+                // Auto-advance to results after animation
+                setTimeout(() => {
+                    nextFrame();
+                }, 1500);
+            }
+        }
+
+        function startOver() {
+            // Reset everything
+            currentFrame = 1;
+            uploadedImage = null;
+            eggCracked = false;
+            
+            // Reset all frames
+            document.getElementById('frame2').classList.remove('active', 'prev');
+            document.getElementById('frame2').classList.add('next');
+            document.getElementById('frame3').classList.remove('active', 'prev');
+            document.getElementById('frame3').classList.add('next');
+            document.getElementById('frame1').classList.remove('prev', 'next');
+            document.getElementById('frame1').classList.add('active');
+            
+            // Reset form elements
+            document.getElementById('fileInput').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('resultImage').style.display = 'none';
+            document.getElementById('nextBtn1').style.display = 'none';
+            
+            // Reset egg
+            document.getElementById('eggShape').classList.remove('cracked');
+            document.getElementById('crackButton').textContent = 'click here to crack the egg';
+            document.getElementById('crackButton').disabled = false;
+        }
+
+        // Drag and drop functionality
+        const frame1 = document.getElementById('frame1');
+        
+        frame1.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            frame1.style.opacity = '0.8';
+        });
+        
+        frame1.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            frame1.style.opacity = '1';
+        });
+        
+        frame1.addEventListener('drop', function(e) {
+            e.preventDefault();
+            frame1.style.opacity = '1';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    document.getElementById('previewImg').src = uploadedImage;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('nextBtn1').style.display = 'block';
+                    
+                    // Prepare result image
+                    document.getElementById('resultImg').src = uploadedImage;
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        });
+    </script>
+</body>
+</html>
