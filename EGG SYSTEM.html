@@ -9,19 +9,40 @@
 <body>
     <div class="container">
         <div class="frames-container">
+            <!-- Frame 0: Landing -->
+            <div class="frame frame-0 active" id="frame0">
+                <div class="welcome-content">
+                    <h1>Welcome to the Egg Freshness Tester</h1>
+                    <p>Upload a picture of your egg and find out if it's still fresh!</p>
+                    <button id="bt0" class="button button-primary" onclick="nextFrame()">Get Started</button>
+                </div>
+                <div class="guide-text" id="guideText">
+                    <div class="Egg-comparision"><br>
+                        <h2>Egg Comparison</h2><br><br>
+                        <img src="https://i.postimg.cc/3x5b1f7H/Egg-comparison.png" alt="Egg Comparison">
+                        <p>Fresh egg</p><br><br>
+                        <img src="https://i.postimg.cc/3x5b1f7H/Egg-comparison.png" alt="Egg Comparison">
+                        <p>Medium egg</p><br><br>
+                        <img src="https://i.postimg.cc/3x5b1f7H/Egg-comparison.png" alt="Egg Comparison">
+                        <p>Old egg</p>
+                    </div>
+                    <div class="instructions">
+                        <h2>Guidelines</h2><br>                        
+                        <p>1. Ensure the egg is clean before testing.</p><br>
+                        <p>2. Put any source of light at the bottom of the egg to reveal its internal colors</p>
+                        <br><p>3. Go in a shaded/dark area to clearly see the egg colors clearly</p>
+                        <br><p>4. Take a picture of the egg, see example below:</p>
+                        <br><img src="https://i.postimg.cc/3x5b1f7H/Egg-comparison.png" alt="Egg Comparison">
+                    </div>
+                </div>
+            </div>
+
             <!-- Frame 1: Upload Picture -->
-            <div class="frame frame-1 active" id="frame1">
+            <div class="frame frame-1 next" id="frame1">
                 <div class="upload-content">
-                    <div class="upload-egg-text">
-                        UPLOAD EGG HERE
-                    </div>
-                    <div class="upload-egg" onclick="chooseFile()">
-                    </div>
-                    
-                    <div class="browse-text">
-                        click the egg to browse or drag egg here
-                    </div>
-                    
+                    <div class="upload-egg-text">UPLOAD EGG HERE</div>
+                    <div class="upload-egg" onclick="chooseFile()"></div>
+                    <div class="browse-text">click the egg to browse or drag egg here</div>
                     <div id="imagePreview" class="image-preview">
                         <img id="previewImg" src="/placeholder.svg" alt="Preview">
                     </div>
@@ -90,7 +111,7 @@
     </div>
 
     <script>
-        let currentFrame = 1;
+        let currentFrame = 0;
         let uploadedImage = null;
         let eggCracked = false;
 
@@ -104,9 +125,6 @@
                     document.getElementById('previewImg').src = uploadedImage;
                     document.getElementById('imagePreview').style.display = 'block';
                     document.getElementById('nextBtn1').style.display = 'block';
-                    
-                    // Prepare result image
-                    document.getElementById('resultImg').src = uploadedImage;
                 };
                 reader.readAsDataURL(file);
             }
@@ -118,29 +136,24 @@
 
         function nextFrame() {
             if (currentFrame < 3) {
-                // Hide current frame
                 document.getElementById(`frame${currentFrame}`).classList.remove('active');
                 document.getElementById(`frame${currentFrame}`).classList.add('prev');
                 
-                // Show next frame
                 currentFrame++;
                 document.getElementById(`frame${currentFrame}`).classList.remove('next');
                 document.getElementById(`frame${currentFrame}`).classList.add('active');
                 
-                // Special handling for frame 3
                 if (currentFrame === 3 && uploadedImage) {
-                    document.getElementById('resultImage').style.display = 'block';
+                    document.getElementById('resultImg').src = uploadedImage;
                 }
             }
         }
 
         function prevFrame() {
-            if (currentFrame > 1) {
-                // Hide current frame
+            if (currentFrame > 0) {
                 document.getElementById(`frame${currentFrame}`).classList.remove('active');
                 document.getElementById(`frame${currentFrame}`).classList.add('next');
                 
-                // Show previous frame
                 currentFrame--;
                 document.getElementById(`frame${currentFrame}`).classList.remove('prev');
                 document.getElementById(`frame${currentFrame}`).classList.add('active');
@@ -157,7 +170,6 @@
                 crackButton.disabled = true;
                 eggCracked = true;
                 
-                // Auto-advance to results after animation
                 setTimeout(() => {
                     nextFrame();
                 }, 1500);
@@ -165,29 +177,34 @@
         }
 
         function startOver() {
-            // Reset everything
-            currentFrame = 1;
+            currentFrame = 0;
             uploadedImage = null;
             eggCracked = false;
-            
-            // Reset all frames
-            document.getElementById('frame2').classList.remove('active', 'prev');
-            document.getElementById('frame2').classList.add('next');
-            document.getElementById('frame3').classList.remove('active', 'prev');
-            document.getElementById('frame3').classList.add('next');
-            document.getElementById('frame1').classList.remove('prev', 'next');
-            document.getElementById('frame1').classList.add('active');
-            
-            // Reset form elements
+
+            // Reset frames
+            resetFrames();
+            resetInputs();
+        }
+
+        function resetFrames() {
+            [...Array(4).keys()].forEach(i => {
+                const frame = document.getElementById(`frame${i}`);
+                frame.classList.remove('active', 'prev', 'next');
+                frame.classList.add(i === 0 ? 'active' : 'next');
+            });
+        }
+
+        function resetInputs() {
             document.getElementById('fileInput').value = '';
             document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('resultImage').style.display = 'none';
             document.getElementById('nextBtn1').style.display = 'none';
-            
-            // Reset egg
-            document.getElementById('eggShape').classList.remove('cracked');
-            document.getElementById('crackButton').textContent = 'click here to crack the egg';
-            document.getElementById('crackButton').disabled = false;
+
+            // Reset egg view
+            const eggShape = document.getElementById('eggShape');
+            const crackButton = document.getElementById('crackButton');
+            eggShape.classList.remove('cracked');
+            crackButton.textContent = 'Click here to crack the egg';
+            crackButton.disabled = false;
         }
 
         // Drag and drop functionality
@@ -215,9 +232,6 @@
                     document.getElementById('previewImg').src = uploadedImage;
                     document.getElementById('imagePreview').style.display = 'block';
                     document.getElementById('nextBtn1').style.display = 'block';
-                    
-                    // Prepare result image
-                    document.getElementById('resultImg').src = uploadedImage;
                 };
                 reader.readAsDataURL(files[0]);
             }
